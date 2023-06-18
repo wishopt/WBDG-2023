@@ -9,15 +9,47 @@
 </head>
 <body>
     <img src="img/logo.png" id="logo" alt="a simple logo containing a desk">
+
     <h1>Desk Sharing Management Tool</h1>
-    <div id="content">
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur commodo cursus felis, in mattis neque consequat non. Duis viverra turpis vitae neque viverra luctus. Integer eleifend risus nec rhoncus iaculis.</p>
+
+    <div id="desksTable"></div>
+
+    <div id="bookingForm">
+        <div>
+            <label for="deskId">Desk ID</label>
+            <input type="text" name="deskId" id="deskId">
+        </div>
+        <div>
+            <label for="user">Name of user</label>
+            <input type="text" name="user" id="user">
+        </div>
+        <div>
+            <label for="email">E-Mail</label>
+            <input type="email" name="email" id="email">
+        </div>
+        <div>
+            <label for="start">Start time</label>
+            <input type="datetime-local" name="start" id="start">
+        </div>
+        <div>
+            <label for="end">End time</label>
+            <input type="datetime-local" name="end" id="end">
+        </div>   
+        <div>
+            <label for="studentId">Student ID</label>
+            <input type="text" name="studentId" id="studentId">
+        </div>
+        <button id="submitBooking">Submit booking</button>
     </div>
+    
+
     <div id="buttons">
-        <button id="btnDisplayAllDesks">Display all desks</button>
+        <button id="btnDisplayAllDesks">Update desks</button>
         <button id="btnNewBooking">New booking</button>
         <button id="btnMyBookings">My bookings</button>
     </div>
+
 </body>
 </html>
+
 <script src="scripts.js"></script> 

@@ -1,26 +1,96 @@
 const baseURL = "https://matthiasbaldauf.com/wbdg23";
 const conversionRateURL = "https://api.exchangerate.host/latest";
 
-const contentDiv = document.getElementById("content");
+const desksTable = document.getElementById("desksTable");
+const bookingForm = document.getElementById("bookingForm");
 const buttons = {
     displayAllDesks: document.getElementById("btnDisplayAllDesks"),
     newBooking: document.getElementById("btnNewBooking"),
+    submitBooking: document.getElementById("submitBooking"),
     allBookings: document.getElementById("btnMyBookings")
+};
+const formInputs = {
+    deskId: document.getElementById("deskId"),
+    user: document.getElementById("user"),
+    email: document.getElementById("email"),
+    start: document.getElementById("start"),
+    end: document.getElementById("end"),
+    studentId: document.getElementById("studentId")
 };
 
 let conversionRates;
+let desksData;
+let inputsValid;
 
 async function displayAllDesks() {
-    const response = await fetch(baseURL + "/desks");
-    const desksData = await response.json();
-
-    clearContent();
+    await updateDesksData();
+    clearTable();
     generateTable(desksData);
 }
 
-function clearContent() {
-    while (contentDiv.firstChild) {
-        contentDiv.removeChild(contentDiv.firstChild);
+function createBooking() {
+    bookingForm.style["display"] = "block";
+}
+
+function submitBooking() {
+    validateInputs();
+    if (!inputsValid) {
+        alert("Error while creating booking, please check your inputs.");
+    }
+
+    // api post on success
+}
+
+async function validateInputs() {
+    await updateDesksData();
+    if (checkDeskId(formInputs.deskId.value) 
+        && checkName(formInputs.user.value)
+        && checkEmail(formInputs.email.value) 
+        && checkDate(formInputs.start.value)
+        && checkDate(formInputs.end.value)
+        && checkStudentId(formInputs.studentId.value)) 
+        {
+        return true;
+    }
+    return false;
+}
+
+function checkDeskId(id) {
+    let validIds = []
+
+    for (const desk of desksData) {
+        validIds.push(desk.id);
+    }
+    return (validIds.includes(id) ? true : false)
+}
+
+function checkName(name) {
+    // Only check if anything is filled in
+    return name ? true : false;
+}
+
+function checkEmail(email) {
+    const regex = new RegExp('[a-z0-9]+@[a-z]+\.[a-z]{2,3}');
+    return regex.test(email);
+}
+
+function checkDate(date) {
+    // Only invalid date is no date, because you can only create valid dates through the datetime-local input
+    return date ? true : false;
+}
+
+function checkStudentId(id) {
+    return /^\d+$/.test(id);
+}
+
+async function updateDesksData() {
+    const response = await fetch(baseURL + "/desks");
+    desksData = await response.json();
+}
+
+function clearTable() {
+    while (desksTable.firstChild) {
+        desksTable.removeChild(desksTable.firstChild);
     }
 }
 
@@ -45,7 +115,7 @@ async function generateTable(data) {
         table.appendChild(row);
     };
 
-    contentDiv.appendChild(table);
+    desksTable.appendChild(table);
 }
 
 function generateTableHead() {
@@ -68,3 +138,7 @@ async function updateConversionRates() {
 }
 
 buttons.displayAllDesks.addEventListener("click", displayAllDesks);
+buttons.submitBooking.addEventListener("click", submitBooking)
+buttons.newBooking.addEventListener("click", createBooking);
+
+displayAllDesks();

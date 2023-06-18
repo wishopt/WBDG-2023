@@ -15,10 +15,16 @@ table {
     text-align: left;
 }
 
-table, th, td {
+th, td {
     border: #444;
     border-style: solid;
     border-width: 1px;
+}
+
+label {
+    text-align: left;
+    display: inline-block;
+    width: 6em;
 }
 
 #logo {
@@ -27,4 +33,9 @@ table, th, td {
     height: 10%;
     max-width: 100px;
     max-height: 100px;
+}
+
+#bookingForm {
+    display: none;
+    margin: 2em 0 2em 0;
 }
