@@ -10,6 +10,17 @@ h1, h2, h3 {
     line-height: 1.2
 }
 
+table {
+    width: 100%;
+    text-align: left;
+}
+
+table, th, td {
+    border: #444;
+    border-style: solid;
+    border-width: 1px;
+}
+
 #logo {
     float: right;
     width: 10%;
