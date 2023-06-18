@@ -1,0 +1,14 @@
+# Task 1
+- Create basic structure
+    - Created the basic file structure manually
+    - index.html was automatically generated using Visual Studio Code
+        - External css and js files had to be linked manually
+- Responsive design
+    - Decided to display the desk information using a html table
+    - Designing the mobile UI was harder because you don't have a lot of horizontal space to work with
+        - Solved by displaying most info with a pop up window
+- Insert text and images
+    - Added some lorem ipsum placeholder text
+    - Created and added a simple logo using a [public domain clipart](https://openclipart.org/detail/294701/desk-rotated-plain-perspective)
+- Create forms
+    - Added three buttons from the sketches
