@@ -1,4 +1,5 @@
-const baseURL = "https://matthiasbaldauf.com/wbdg23"
+const baseURL = "https://matthiasbaldauf.com/wbdg23";
+const conversionRateURL = "https://api.exchangerate.host/latest";
 
 const contentDiv = document.getElementById("content");
 const buttons = {
@@ -6,6 +7,8 @@ const buttons = {
     newBooking: document.getElementById("btnNewBooking"),
     allBookings: document.getElementById("btnMyBookings")
 };
+
+let conversionRates;
 
 async function displayAllDesks() {
     const response = await fetch(baseURL + "/desks");
@@ -19,9 +22,9 @@ function clearContent() {
     while (contentDiv.firstChild) {
         contentDiv.removeChild(contentDiv.firstChild);
     }
-};
+}
 
-function generateTable(data) {
+async function generateTable(data) {
     let table = document.createElement("table");
     table.appendChild(generateTableHead(data[0]));
 
@@ -31,6 +34,9 @@ function generateTable(data) {
             let cell = document.createElement("td");
             if (key == "available") {
                 cell.innerHTML = (value == 1 ? "available" : "unavailable");
+            } else if (key == "price") {
+                await updateConversionRates(); 
+                cell.innerHTML = value + " CHF / " + Math.round((value / conversionRates.rates.CHF) * 100) / 100 + " EUR";
             } else {
                 cell.innerHTML = value;
             };
@@ -40,11 +46,11 @@ function generateTable(data) {
     };
 
     contentDiv.appendChild(table);
-};
+}
 
 function generateTableHead() {
     let tableHead = document.createElement("tr");
-    let properties = ["ID", "Name", "Status", "Address", "Price", "Latitude", "Longitude", "Comment"];
+    let properties = ["ID", "Name", "Status", "Address", "Price / Hour", "Latitude", "Longitude", "Comment"];
 
     for (const property of properties) {
         let th = document.createElement("th");
@@ -53,6 +59,12 @@ function generateTableHead() {
     };
 
     return tableHead;
-};
+}
+
+async function updateConversionRates() {
+    const response = await fetch(conversionRateURL);
+    const currentRates = await response.json();
+    conversionRates = currentRates;
+}
 
 buttons.displayAllDesks.addEventListener("click", displayAllDesks);
