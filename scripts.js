@@ -20,7 +20,8 @@ const formInputs = {
 
 let conversionRates;
 let desksData;
-let inputsValid;
+let inputsValid = false;
+let bookingData = {};
 
 async function displayAllDesks() {
     await updateDesksData();
@@ -32,27 +33,55 @@ function createBooking() {
     bookingForm.style["display"] = "block";
 }
 
-function submitBooking() {
-    validateInputs();
+async function submitBooking() {
+    await updateBookingData();
+    await validateInputs();
     if (!inputsValid) {
         alert("Error while creating booking, please check your inputs.");
+        return;
     }
 
-    // api post on success
+    sendBookingData(bookingData);
+}
+
+function updateBookingData() {
+    bookingData = {
+        deskid: formInputs.deskId.value,
+        user: formInputs.user.value,
+        email: formInputs.email.value,
+        start: formInputs.start.value,
+        end: formInputs.end.value,
+        studid: formInputs.studentId.value
+    }
+}
+
+async function sendBookingData(bookingData) {
+    const response = await fetch(baseURL + "/booking", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(bookingData)
+    });
+
+    let responseData = await response.json();
+    console.log(responseData);
+    // ToDo: Fix error "parameter <deskid> missing" and notify user of successful booking
 }
 
 async function validateInputs() {
     await updateDesksData();
-    if (checkDeskId(formInputs.deskId.value) 
-        && checkName(formInputs.user.value)
-        && checkEmail(formInputs.email.value) 
-        && checkDate(formInputs.start.value)
-        && checkDate(formInputs.end.value)
-        && checkStudentId(formInputs.studentId.value)) 
+    if (checkDeskId(bookingData.deskid) 
+        && checkName(bookingData.user)
+        && checkEmail(bookingData.email) 
+        && checkDate(bookingData.start)
+        && checkDate(bookingData.end)
+        && checkStudentId(bookingData.studid)) 
         {
-        return true;
+        inputsValid = true;
+        return
     }
-    return false;
+    inputsValid = false;
 }
 
 function checkDeskId(id) {
@@ -61,26 +90,47 @@ function checkDeskId(id) {
     for (const desk of desksData) {
         validIds.push(desk.id);
     }
-    return (validIds.includes(id) ? true : false)
+
+    if (!validIds.includes(id)) {
+        alert("Please check the desk ID.");
+        return false;
+    }
+    return true;
 }
 
 function checkName(name) {
     // Only check if anything is filled in
-    return name ? true : false;
+    if (!name) {
+        alert("Please make sure you input a name.");
+        return false;
+    }
+    return true;
 }
 
 function checkEmail(email) {
     const regex = new RegExp('[a-z0-9]+@[a-z]+\.[a-z]{2,3}');
-    return regex.test(email);
+    if (!regex.test(email)) {
+        alert("Please check your e-mail address.");
+        return false;
+    }
+    return true;
 }
 
 function checkDate(date) {
     // Only invalid date is no date, because you can only create valid dates through the datetime-local input
-    return date ? true : false;
+    if (!date) {
+        alert("Please check your start and end date.");
+        return false;
+    }
+    return true;
 }
 
 function checkStudentId(id) {
-    return /^\d+$/.test(id);
+    if(!/^\d+$/.test(id)) {
+        alert("Please check your student ID.");
+        return false;
+    }
+    return true;
 }
 
 async function updateDesksData() {
