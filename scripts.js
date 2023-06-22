@@ -9,19 +9,13 @@ const buttons = {
     submitBooking: document.getElementById("submitBooking"),
     allBookings: document.getElementById("btnMyBookings")
 };
-const formInputs = {
-    deskId: document.getElementById("deskId"),
-    user: document.getElementById("user"),
-    email: document.getElementById("email"),
-    start: document.getElementById("start"),
-    end: document.getElementById("end"),
-    studentId: document.getElementById("studentId")
-};
+
+const form = document.getElementById("bookingForm")
 
 let conversionRates;
 let desksData;
 let inputsValid = false;
-let bookingData = {};
+let bookingData;
 
 async function displayAllDesks() {
     await updateDesksData();
@@ -34,7 +28,10 @@ function createBooking() {
 }
 
 async function submitBooking() {
-    await updateBookingData();
+    bookingData = new FormData(form);
+    bookingData.set("start", bookingData.get("start") + ":00")
+    bookingData.set("end", bookingData.get("end") + ":00")
+
     await validateInputs();
     if (!inputsValid) {
         alert("Error while creating booking, please check your inputs.");
@@ -42,41 +39,31 @@ async function submitBooking() {
     }
 
     sendBookingData(bookingData);
-}
 
-function updateBookingData() {
-    bookingData = {
-        deskid: formInputs.deskId.value,
-        user: formInputs.user.value,
-        email: formInputs.email.value,
-        start: formInputs.start.value,
-        end: formInputs.end.value,
-        studid: formInputs.studentId.value
-    }
+    // ToDo: Notify user of successful booking, save in "my bookings"
 }
 
 async function sendBookingData(bookingData) {
+
     const response = await fetch(baseURL + "/booking", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(bookingData)
+        body: bookingData
     });
 
     let responseData = await response.json();
     console.log(responseData);
-    // ToDo: Fix error "parameter <deskid> missing" and notify user of successful booking
+    
 }
 
 async function validateInputs() {
     await updateDesksData();
-    if (checkDeskId(bookingData.deskid) 
-        && checkName(bookingData.user)
-        && checkEmail(bookingData.email) 
-        && checkDate(bookingData.start)
-        && checkDate(bookingData.end)
-        && checkStudentId(bookingData.studid)) 
+    console.log(bookingData.get("start"))
+    if (checkDeskId(bookingData.get("deskid")) 
+        && checkName(bookingData.get("user"))
+        && checkEmail(bookingData.get("email")) 
+        && checkDate(bookingData.get("start"))
+        && checkDate(bookingData.get("end"))
+        && checkStudentId(bookingData.get("studid"))) 
         {
         inputsValid = true;
         return

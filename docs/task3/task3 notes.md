@@ -13,3 +13,4 @@
     - always responds with `"parameter <deskid> missing"`, both inside of the tool, and when testing the API with [Postman](https://web.postman.co/)
     - ![](error.png)
     - ![](error2.png)
+    - Solution: Send data as [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData/Using_FormData_Objects) instead of json parameters
