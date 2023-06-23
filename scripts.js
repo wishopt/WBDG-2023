@@ -6,16 +6,19 @@ const bookingForm = document.getElementById("bookingForm");
 const buttons = {
     displayAllDesks: document.getElementById("btnDisplayAllDesks"),
     newBooking: document.getElementById("btnNewBooking"),
-    submitBooking: document.getElementById("submitBooking"),
-    allBookings: document.getElementById("btnMyBookings")
+    submitBooking: document.getElementById("btnSubmitBooking"),
+    timeslots: document.getElementById("btnTimeslots")
 };
 
-const form = document.getElementById("bookingForm")
+const studId = document.getElementById("studid");
+const idDropdown = document.getElementById("deskid");
+const form = document.getElementById("bookingForm");
 
 let conversionRates;
 let desksData;
 let inputsValid = false;
 let bookingData;
+let bookings;
 
 async function displayAllDesks() {
     await updateDesksData();
@@ -44,26 +47,73 @@ async function submitBooking() {
         return;
     }
 
-    sendBookingData(bookingData);
+    await sendBookingData(bookingData);
 
-    // ToDo: Notify user of successful booking, save in "my bookings"
 }
 
 async function sendBookingData(bookingData) {
-
     const response = await fetch(baseURL + "/booking", {
         method: "POST",
         body: bookingData
     });
 
     let responseData = await response.json();
-    console.log(responseData);
     
+    alert(responseData.message)
+}
+
+async function displayCurrentBookings() {
+    let now = new Date(Date.now());
+    let request = {
+        deskid: idDropdown.value,   
+        // toISOString() returns date in the YYYY-MM-DDTHH:mm:ss.sssZ format -> slice of last 5 chars for correct format
+        start: new Date(now.setDate(now.getDate() - 1)).toISOString().slice(0, -5), // Default start value: now minus one day (to make sure recent bookings get displayed)
+        end: new Date(now.setDate(now.getDate() + 100)).toISOString().slice(0, -5), // Default end value: one week from now
+        studid: studId.value
+    }
+
+    if (!request.studid) {
+        alert("Please enter your student ID");
+        return;
+    }
+
+    const response = await fetch(baseURL + "/bookings?" + new URLSearchParams(request), {
+        method: "GET",
+    });
+
+    currentBookings = await response.json();
+
+    let tableData = [];
+
+    for (let booking of currentBookings) {
+        tableData.push({
+            id: booking.id,
+            // Remove time zone & seconds and replace the "T" with a space to make the date format prettier
+            start: booking.start.slice(0, -8).replace("T", " "),
+            end: booking.end.slice(0, -8).replace("T", " "),
+            user: booking.user,
+            email: booking.email
+        });
+    }
+
+    // ToDo: Correctly append checkbox to table
+    // for (let i in tableData) {
+    //     let checkbox = document.createElement("input");
+    //     checkbox.type = "checkbox";
+    //     checkbox.value = i;
+    //     checkbox.id = `checkbox-${i}`
+    //     tableData[i].checkbox = checkbox;
+    // }
+
+    generateTable(tableData, ["Reservation ID", "Start", "End", "User", "Email"]);
+
+    let title = document.createElement("h2");
+    title.textContent = `Bookings between ${request.start.replace("T", " ")} and ${request.end.replace("T", " ")}`
+    desksTable.prepend(title)
 }
 
 async function validateInputs() {
     await updateDesksData();
-    console.log(bookingData.get("start"))
     if (checkDeskId(bookingData.get("deskid")) 
         && checkName(bookingData.get("user"))
         && checkEmail(bookingData.get("email")) 
@@ -128,7 +178,10 @@ function checkStudentId(id) {
 
 async function updateDesksData() {
     const response = await fetch(baseURL + "/desks");
-    desksData = await response.json();
+    let responseData = await response.json();
+    desksData = responseData.sort((a, b) => {
+        return a.id - b.id;
+    });
 }
 
 function clearTable() {
@@ -181,7 +234,8 @@ async function updateConversionRates() {
 }
 
 buttons.displayAllDesks.addEventListener("click", displayAllDesks);
-buttons.submitBooking.addEventListener("click", submitBooking)
+buttons.submitBooking.addEventListener("click", submitBooking);
 buttons.newBooking.addEventListener("click", createBooking);
+buttons.timeslots.addEventListener("click", displayCurrentBookings);
 
 displayAllDesks();
