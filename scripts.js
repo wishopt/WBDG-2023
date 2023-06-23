@@ -20,7 +20,7 @@ let bookingData;
 async function displayAllDesks() {
     await updateDesksData();
     clearTable();
-    generateTable(desksData);
+    generateTable(desksData, ["ID", "Name", "Status", "Address", "Price / Hour", "Latitude", "Longitude", "Comment"]);
 }
 
 function createBooking() {
@@ -131,9 +131,10 @@ function clearTable() {
     }
 }
 
-async function generateTable(data) {
+async function generateTable(data, headings) {
+    clearTable();
     let table = document.createElement("table");
-    table.appendChild(generateTableHead(data[0]));
+    table.appendChild(generateTableHead(headings));
 
     for (const property of data) {
         let row = document.createElement("tr");
@@ -155,17 +156,16 @@ async function generateTable(data) {
     desksTable.appendChild(table);
 }
 
-function generateTableHead() {
-    let tableHead = document.createElement("tr");
-    let properties = ["ID", "Name", "Status", "Address", "Price / Hour", "Latitude", "Longitude", "Comment"];
+function generateTableHead(headings) {
+    let tableRow = document.createElement("tr");
 
-    for (const property of properties) {
+    for (const property of headings) {
         let th = document.createElement("th");
         th.innerHTML = property;
-        tableHead.appendChild(th);
+        tableRow.appendChild(th);
     };
 
-    return tableHead;
+    return tableRow;
 }
 
 async function updateConversionRates() {
