@@ -24,6 +24,12 @@ async function displayAllDesks() {
 }
 
 function createBooking() {
+    for (let desk of desksData) {
+        let dropdownOption = document.createElement("option");
+        dropdownOption.value = desk.id;
+        dropdownOption.textContent = desk.id;
+        idDropdown.appendChild(dropdownOption);
+    }
     bookingForm.style["display"] = "block";
 }
 
