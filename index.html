@@ -16,9 +16,14 @@
 
     <form id="bookingForm">
         <div>
+            <label for="studid">Student ID</label>
+            <input type="text" name="studid" id="studid">
+        </div>
+        <div>
             <label for="deskid">Desk ID</label>
             <select type="text" name="deskid" id="deskid">
             </select>
+            <button type="button" id="btnTimeslots">Display your current bookings</button>
         </div>
         <div>
             <label for="user">Name of user</label>
@@ -36,18 +41,13 @@
             <label for="end">End time</label>
             <input type="datetime-local" name="end" id="end">
         </div>   
-        <div>
-            <label for="studid">Student ID</label>
-            <input type="text" name="studid" id="studid">
-        </div>
-        <button type="button" id="submitBooking">Submit booking</button>
+        <button type="button" id="btnSubmitBooking">Submit booking</button>
+        <button type="button" id="btnDisplayAllDesks">Update desks</button>
     </form>
     
 
     <div id="buttons">
-        <button id="btnDisplayAllDesks">Update desks</button>
         <button id="btnNewBooking">New booking</button>
-        <button id="btnMyBookings">My bookings</button>
     </div>
 
 </body>
