@@ -14,3 +14,9 @@
     - ![](error.png)
     - ![](error2.png)
     - Solution: Send data as [FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData/Using_FormData_Objects) instead of json parameters
+
+## Save user data locally
+
+- Saving and loading the data was very easy with the [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) function.
+  - Load the save value at startup with the `localStorage.getItem()` function, set a default value if it's `null`
+  - Save the value to localStorage with `localStorage.getItem()` if the booking is successful

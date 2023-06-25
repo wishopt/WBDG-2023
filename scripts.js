@@ -10,8 +10,14 @@ const buttons = {
     timeslots: document.getElementById("btnTimeslots")
 };
 
-const studId = document.getElementById("studid");
-const idDropdown = document.getElementById("deskid");
+const formInputs = {
+    studid: document.getElementById("studid"),
+    deskid: document.getElementById("deskid"),
+    user: document.getElementById("user"),
+    email: document.getElementById("email"),
+    start: document.getElementById("start"),
+    end: document.getElementById("end"),
+};
 const form = document.getElementById("bookingForm");
 
 let conversionRates;
@@ -19,6 +25,14 @@ let desksData;
 let inputsValid = false;
 let bookingData;
 let bookings;
+let savedFormInput = JSON.parse(localStorage.getItem("previousFormInput"));
+
+if (!savedFormInput) {
+    savedFormInput = {
+        user: "",
+        email: ""
+    };
+}
 
 async function displayAllDesks() {
     await updateDesksData();
@@ -31,8 +45,10 @@ function createBooking() {
         let dropdownOption = document.createElement("option");
         dropdownOption.value = desk.id;
         dropdownOption.textContent = desk.id;
-        idDropdown.appendChild(dropdownOption);
+        formInputs.deskid.appendChild(dropdownOption);
     }
+    formInputs.user.value = savedFormInput.user;
+    formInputs.email.value = savedFormInput.email;
     bookingForm.style["display"] = "block";
 }
 
@@ -47,8 +63,16 @@ async function submitBooking() {
         return;
     }
 
-    await sendBookingData(bookingData);
-
+    await sendBookingData(bookingData)
+    .then((response) => {
+        if (response.ok) {
+            savedFormInput = {
+                user: formInputs.user.value,
+                email: formInputs.email.value
+            };
+            localStorage.setItem("previousFormInput", JSON.stringify(savedFormInput));
+        }
+    });
 }
 
 async function sendBookingData(bookingData) {
@@ -60,16 +84,18 @@ async function sendBookingData(bookingData) {
     let responseData = await response.json();
     
     alert(responseData.message)
+
+    return response;
 }
 
 async function displayCurrentBookings() {
     let now = new Date(Date.now());
     let request = {
-        deskid: idDropdown.value,   
+        deskid: formInputs.deskid.value,   
         // toISOString() returns date in the YYYY-MM-DDTHH:mm:ss.sssZ format -> slice of last 5 chars for correct format
         start: new Date(now.setDate(now.getDate() - 1)).toISOString().slice(0, -5), // Default start value: now minus one day (to make sure recent bookings get displayed)
         end: new Date(now.setDate(now.getDate() + 100)).toISOString().slice(0, -5), // Default end value: one week from now
-        studid: studId.value
+        studid: formInputs.studid.value
     }
 
     if (!request.studid) {
