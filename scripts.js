@@ -88,7 +88,7 @@ async function sendBookingData(bookingData) {
     return response;
 }
 
-async function displayCurrentBookings() {
+async function displayExistingBookings() {
     let now = new Date(Date.now());
     let request = {
         deskid: formInputs.deskid.value,   
@@ -103,6 +103,11 @@ async function displayCurrentBookings() {
         return;
     }
 
+    // Request bookings from selected time range
+    await updateTableCurrentBookings(request);
+}
+
+async function updateTableCurrentBookings(request) {
     const response = await fetch(baseURL + "/bookings?" + new URLSearchParams(request), {
         method: "GET",
     });
@@ -122,20 +127,96 @@ async function displayCurrentBookings() {
         });
     }
 
-    // ToDo: Correctly append checkbox to table
-    // for (let i in tableData) {
-    //     let checkbox = document.createElement("input");
-    //     checkbox.type = "checkbox";
-    //     checkbox.value = i;
-    //     checkbox.id = `checkbox-${i}`
-    //     tableData[i].checkbox = checkbox;
-    // }
+    // Add checkboxes for booking deletion to table
+    for (let i in tableData) {
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = i;
+        checkbox.id = `checkbox-${i}`;
+        tableData[i].checkbox = checkbox;
+    }
 
-    generateTable(tableData, ["Reservation ID", "Start", "End", "User", "Email"]);
+    generateTable(tableData, ["Reservation ID", "Start", "End", "User", "Email", "Select"]);
 
+    // Add delete booking button
+    let deleteButton = document.createElement("input");
+    deleteButton.type = "button";
+    deleteButton.value = "Cancel selected bookings";
+    deleteButton.id = "deleteButton";
+    deleteButton.addEventListener("click", deleteBookings);
+    desksTable.append(deleteButton);
+
+    // Add time range selection
+    let timeRangeEnd = document.createElement("input");
+    timeRangeEnd.type = "datetime-local";
+    timeRangeEnd.min = new Date(Date.now()).toISOString().slice(0, -8);
+    timeRangeEnd.id = "timeRangeEnd";
+    timeRangeEnd.value = request.end;
+    desksTable.prepend(timeRangeEnd)
+
+    let timeRangeStart = document.createElement("input");
+    timeRangeStart.type = "datetime-local";
+    timeRangeStart.min = new Date(Date.now()).toISOString().slice(0, -8);
+    timeRangeStart.id = "timeRangeStart";
+    timeRangeStart.value = request.start;
+    desksTable.prepend(timeRangeStart)
+
+    // Add update button
+    let updateButton = document.createElement("input");
+    updateButton.type = "button";
+    updateButton.value = "Update with date selection";
+    updateButton.id = "updateButton";
+    updateButton.addEventListener("click", updateExistingBookings);
+    desksTable.prepend(updateButton);
+    
+    // Add title
     let title = document.createElement("h2");
     title.textContent = `Bookings between ${request.start.replace("T", " ")} and ${request.end.replace("T", " ")}`
     desksTable.prepend(title)
+}
+
+function updateExistingBookings() {
+    let startDate = document.getElementById("timeRangeStart").value;
+    let endDate = document.getElementById("timeRangeEnd").value;
+
+    let request = {
+        deskid: formInputs.deskid.value,   
+        start: startDate,
+        end: endDate,
+        studid: formInputs.studid.value
+    }
+
+    updateTableCurrentBookings(request);
+}
+
+async function deleteBookings() {
+    let deletions = [];
+    let tableData = [];
+    for (let booking of currentBookings) {
+        tableData.push({
+            id: booking.id,
+            studid: booking.studid
+        });
+    }
+
+    for (let i in tableData) {
+        if (document.getElementById(`checkbox-${i}`).checked) {
+            deletions.push(tableData[i]);
+        }
+    }
+
+    for (let deletion of deletions) {
+        let request = {
+            id: deletion.id,
+            studid: deletion.studid
+        };
+
+        const response = await fetch(baseURL + "/booking?" + new URLSearchParams(request), {
+            method: "DELETE",
+        });
+    }
+
+    displayExistingBookings();
 }
 
 async function validateInputs() {
@@ -230,6 +311,8 @@ async function generateTable(data, headings) {
             } else if (key == "price") {
                 await updateConversionRates(); 
                 cell.innerHTML = value + " CHF / " + Math.round((value / conversionRates.rates.CHF) * 100) / 100 + " EUR";
+            } else if (key == "checkbox") {
+                cell.appendChild(value);
             } else {
                 cell.innerHTML = value;
             };
@@ -259,9 +342,15 @@ async function updateConversionRates() {
     conversionRates = currentRates;
 }
 
+// Set up interactivity
 buttons.displayAllDesks.addEventListener("click", displayAllDesks);
 buttons.submitBooking.addEventListener("click", submitBooking);
 buttons.newBooking.addEventListener("click", createBooking);
-buttons.timeslots.addEventListener("click", displayCurrentBookings);
+buttons.timeslots.addEventListener("click", displayExistingBookings);
 
+// Set minimum values for date selectors
+formInputs.start.min = new Date(Date.now()).toISOString().slice(0, -8);
+formInputs.end.min = new Date(Date.now()).toISOString().slice(0, -8);
+
+// Load table
 displayAllDesks();
