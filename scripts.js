@@ -307,12 +307,18 @@ async function generateTable(data, headings) {
         for (const [key, value] of Object.entries(property)) {
             let cell = document.createElement("td");
             if (key == "available") {
-                cell.innerHTML = (value == 1 ? "available" : "unavailable");
+                if (value == 1) {
+                    cell.innerHTML = "available";
+                } else {
+                    cell.innerHTML = "unavailable";
+                    cell.style["background-color"] = "#e39899";
+                }
             } else if (key == "price") {
                 await updateConversionRates(); 
                 cell.innerHTML = value + " CHF / " + Math.round((value / conversionRates.rates.CHF) * 100) / 100 + " EUR";
             } else if (key == "checkbox") {
                 cell.appendChild(value);
+                
             } else {
                 cell.innerHTML = value;
             };
